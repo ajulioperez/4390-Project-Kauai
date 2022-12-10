@@ -1,0 +1,58 @@
+﻿@page "/loglist"
+@using BlazorApp2.Shared
+@using System.Net.Http.Headers
+@inject HttpClient Http
+
+<h1>Website Checklist</h1>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+@if (Logs == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Temp. (C)</th>
+                <th>Temp. (F)</th>
+                <th>Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var Log in Logs)
+            {
+                <tr>
+                    <td>@Log.Name</td>
+                    <td>@Log.Website</td>
+                    <td>@Log.Checked</td>
+                    <td>@Log.LogDate</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<tbllog> Logs;
+    private bool response2 { get; set; }
+    private string ServerBaseUrl { get; set; } = "https://localhost:44317/";
+    protected override async Task OnInitializedAsync()
+    {
+        using (var client2 = new HttpClient())
+        {
+
+            client2.BaseAddress = new Uri(ServerBaseUrl);
+
+            client2.DefaultRequestHeaders.Accept.Clear();
+            client2.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            //  bool response = await client2.GetFromJsonAsync<bool>($"api/Values/CheckStatus/{Website}");
+
+            Logs = await client2.GetFromJsonAsync<List<tbllog>>("Values/GetList");
+        }
+    }
+
+}

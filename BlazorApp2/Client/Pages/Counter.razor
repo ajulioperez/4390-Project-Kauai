@@ -1,0 +1,88 @@
+﻿@page "/addlog"
+@using BlazorApp2.Shared
+@using System.Net
+@using System.Net.Http.Headers
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@inject HttpClient Http
+
+@inject IHttpClientFactory ClientFactory
+<h1>Create Website Checks</h1>
+
+
+
+
+<EditForm Model="log" Context="editContext">
+
+
+    <label>Enter Your Name:</label>
+    <InputText @bind-Value="Name"></InputText>
+    <br />
+    <label>Enter Website URL:</label>
+    <InputText @bind-Value="Website"></InputText>
+    <br>
+
+    <button class="btn btn-primary" @onclick="@(() => SubmitCourse(editContext))">Submit</button>
+</EditForm>
+@code {
+    private tbllog tbllogs = new tbllog();
+    private tbllog log
+    {
+        get => tbllogs;
+        set
+        {
+            tbllogs = value;
+        }
+
+
+    }
+    private string Check { get; set; }
+    private string Website { get; set; }
+    private string Name { get; set; }
+    private int currentCount = 0;
+    private bool response2 { get; set; } = false;
+    private string ServerBaseUrl { get; set; } = "https://localhost:44317/";
+
+
+
+    private async Task SubmitCourse(EditContext editContext)
+    {
+          var options = new JsonSerializerOptions()
+            {
+                ReferenceHandler = ReferenceHandler.Preserve,
+                PropertyNameCaseInsensitive = true
+            };
+        using (var client2 = new HttpClient())
+        {
+
+            client2.BaseAddress = new Uri(ServerBaseUrl);
+            Console.WriteLine("ServerBaseUrl :" + ServerBaseUrl);
+            client2.DefaultRequestHeaders.Accept.Clear();
+            client2.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            //  bool response = await client2.GetFromJsonAsync<bool>($"api/Values/CheckStatus/{Website}");
+
+            bool response =await client2.GetFromJsonAsync<bool>($"Values/CheckStatus/{Website}");
+            if (response)
+            {
+                log.Checked = "Online";
+                HttpResponseMessage response3 = client2.PostAsJsonAsync<tbllog>("AddLogs",log).Result;
+
+            }
+            else
+
+            {
+               log.Checked = "Offline";
+                HttpResponseMessage response3 = client2.PostAsJsonAsync<tbllog>("AddLogs",log).Result;
+
+            }
+           
+        }
+
+
+
+
+    
+
+
+    }
+}
